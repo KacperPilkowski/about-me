@@ -1,0 +1,17 @@
+﻿# Obsidian — personal state, don't share
+docs/.obsidian/workspace.json
+docs/.obsidian/workspace-mobile.json
+docs/.obsidian/cache
+
+# Angular
+apps/frontend/node_modules/
+apps/frontend/dist/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+
+# DODO: add missing filters base on project structure.

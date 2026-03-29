@@ -1,0 +1,11 @@
+﻿# Fallback — everything needs your approval
+*                           @KacperPilkowski
+
+# Infra changes always need your sign-off as architect
+infra/                      @KacperPilkowski
+
+# ADRs — architectural decisions need explicit review
+docs/adr/                   @KacperPilkowski
+
+# CI/CD changes are sensitive
+.github/                    @KacperPilkowski

@@ -1,0 +1,65 @@
+﻿{
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "permissions": {
+        "allow": [
+            "Bash(dotnet build*)",
+            "Bash(dotnet test*)",
+            "Bash(dotnet restore*)",
+            "Bash(npm ci)",
+            "Bash(npm run *)",
+            "Bash(ng *)",
+            "Bash(terraform init*)",
+            "Bash(terraform plan*)",
+            "Bash(terraform validate*)",
+            "Bash(terraform fmt*)",
+            "Bash(git status)",
+            "Bash(git diff*)",
+            "Bash(git log*)",
+            "Bash(git add*)",
+            "Bash(git commit*)"
+        ],
+        "deny": [
+            "Bash(terraform apply*)",
+            "Bash(terraform destroy*)",
+            "Bash(git push --force*)",
+            "Bash(rm -rf*)",
+            "Bash(curl*)",
+            "Read(.env)",
+            "Read(.env.*)",
+            "Read(**/secrets/**)",
+            "Read(**/*.pfx)",
+            "Read(**/*.key)"
+        ]
+    },
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "if echo '$CLAUDE_FILE_PATH' | grep -q '\\.cs$'; then dotnet format apps/api/MyApp.sln --include $CLAUDE_FILE_PATH 2>/dev/null || true; fi"
+                    },
+                    {
+                        "type": "command",
+                        "command": "if echo '$CLAUDE_FILE_PATH' | grep -qE '\\.(ts|html|scss)$'; then npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true; fi"
+                    }
+                ]
+            }
+        ],
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "if echo '$CLAUDE_TOOL_INPUT' | grep -qE 'git push.*main|git push.*master'; then echo 'Direct push to main is blocked — use a feature branch and PR'; exit 2; fi"
+                    }
+                ]
+            }
+        ]
+    },
+    "env": {
+        "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75"
+    }
+}

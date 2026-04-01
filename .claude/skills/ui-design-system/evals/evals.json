@@ -1,0 +1,26 @@
+{
+  "skill_name": "ui-design-system",
+  "evals": [
+    {
+      "id": 0,
+      "name": "lookup-hover-classes",
+      "prompt": "I'm implementing the skill card component in Angular. What exact Tailwind classes should I use for the hover state? Also, what's the transition timing?",
+      "expected_output": "Should find and report the exact hover classes from the skill-card spec (bg-surface, border-border-accent, -translate-y-0.5) and the timing from either the spec (duration-fast) or interaction-transitions.md",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "create-new-spec",
+      "prompt": "I need to add a new component spec for a 'social-links' component. It's a row of icon links (GitHub, LinkedIn, email) that sits at the bottom of the sidebar. Each icon is 24x24, uses text-muted by default and text-accent on hover. The row has gap-3 between icons. Create the spec file for me.",
+      "expected_output": "Should create a properly formatted spec.md at 04-components/social-links/spec.md following all vault conventions: correct frontmatter, ASCII anatomy, Tailwind classes, states table, accessibility, Angular tag. Should use design tokens (not raw values) and follow font/color rules.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "cross-reference-navigation",
+      "prompt": "I need to understand the full mobile experience for the skills section. How does it look on mobile, what animations fire, and are there any special accessibility concerns?",
+      "expected_output": "Should pull info from multiple files: mobile-layout.md (single column, full width), skills-section spec (grid changes), skill-card spec, motion-rules.md (prefers-reduced-motion), cv-page-flow.md (scroll reveal, show more), a11y-checklist.md. Should synthesize across files, not just dump one.",
+      "files": []
+    }
+  ]
+}

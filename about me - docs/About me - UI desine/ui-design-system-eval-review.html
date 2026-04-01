@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "ui-design-system", "runs": [{"id": "eval-0-lookup-hover-classes-with_skill", "prompt": "I'm implementing the skill card component in Angular. What exact Tailwind classes should I use for the hover state? Also, what's the transition timing?", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# Skill Card Component \u2014 Hover State & Transition Timing\n\n## Exact Tailwind Classes for Hover State\n\nFor the **app-skill-card** component hover state, use these classes:\n\n```html\nhover:bg-surface hover:border-border-accent hover:-translate-y-0.5\n```\n\n### Breakdown\n\n| Property | Tailwind class | Effect |\n|----------|---|---|\n| Background | `hover:bg-surface` | Changes from `bg-surface-alt` to `bg-surface` |\n| Border | `hover:border-border-accent` | Changes from `border-border` to `border-border-accent` |\n| Transform | `hover:-translate-y-0.5` | Lifts the card up by 2px (half of 1 unit) |\n\n## Transition Timing\n\n### Duration\n\n**Use `duration-fast` \u2014 150 milliseconds**\n\n```html\ntransition-all duration-fast\n```\n\nThe spec explicitly states:\n> 150ms (`duration-fast`) for micro-interactions (icon swaps, color changes).\n\n### Easing Function\n\n**Use `ease-default` \u2014 cubic-bezier(0.4, 0, 0.2, 1)**\n\nThis is the standard easing for all interactions in the design system.\n\n## Complete Class String\n\n```html\nclass=\"bg-surface-alt border border-border rounded-md p-4 min-h-[72px]\n        hover:bg-surface hover:border-border-accent hover:-translate-y-0.5\n        transition-all duration-fast ease-default\"\n```\n\n## Reference Files\n\n- **Component Spec:** `04-components/skill-card/spec.md`\n- **Interaction Transitions:** `05-animations/interaction-transitions.md`\n- **Spacing & Sizing Tokens:** `01-tokens/spacing-and-sizing.md`\n\n## Implementation Notes\n\n1. The `transition-all` property animates all three changes simultaneously (background, border, and transform).\n2. No focus state additional classes needed in the hover definition \u2014 the spec notes that focus styling adds a focus ring separately.\n3. The `-translate-y-0.5` creates a subtle lift effect on hover (2px upward movement).\n4. All token values (`surface`, `surface-alt`, `border-border-accent`, `duration-fast`, `ease-default`) are defined in `tailwind.config.ts`.\n"}], "grading": {"eval_id": 0, "eval_name": "lookup-hover-classes", "configuration": "with_skill", "expectations": [{"text": "Mentions hover:bg-surface as the hover background class", "passed": true, "evidence": "Line 8 shows the exact class: `hover:bg-surface`"}, {"text": "Mentions hover:border-border-accent as the hover border class", "passed": true, "evidence": "Line 8 shows the exact class: `hover:border-border-accent`"}, {"text": "Mentions hover:-translate-y-0.5 for the lift effect", "passed": true, "evidence": "Line 8 shows the exact class: `hover:-translate-y-0.5`, and line 17 explains the effect"}, {"text": "Identifies duration-fast (150ms) as the transition timing", "passed": true, "evidence": "Line 22-23 explicitly states: 'Use `duration-fast` \u2014 150 milliseconds'"}, {"text": "References the skill-card spec file or interaction-transitions as the source", "passed": true, "evidence": "Lines 47-49 reference both sources: '04-components/skill-card/spec.md' and '05-animations/interaction-transitions.md'"}]}}, {"id": "eval-0-lookup-hover-classes-without_skill", "prompt": "I'm implementing the skill card component in Angular. What exact Tailwind classes should I use for the hover state? Also, what's the transition timing?", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# Skill Card Component: Hover Classes & Transition Timing\n\n## Hover State Tailwind Classes\n\nFor the skill card component (`app-skill-card`), use these exact Tailwind classes for the hover state:\n\n```html\nclass=\"bg-surface-alt border border-border rounded-md p-4 min-h-[72px]\n       hover:bg-surface hover:border-border-accent hover:-translate-y-0.5\n       transition-all duration-fast\"\n```\n\n### Hover-specific classes:\n- `hover:bg-surface` \u2014 Background color changes from `surface-alt` to `surface`\n- `hover:border-border-accent` \u2014 Border color changes to accent color\n- `hover:-translate-y-0.5` \u2014 Subtle lift effect (translates up by 2px)\n- `transition-all` \u2014 Applies transition to all properties\n- `duration-fast` \u2014 Transition duration of **150ms**\n\n## Transition Timing\n\n**Duration:** `duration-fast` = **150ms**\n\nThis is the appropriate timing for card hover interactions per the design system. According to the Interaction Transitions spec:\n\n> 150ms (`duration-fast`) for micro-interactions (icon swaps, color changes).\n> 300ms (`duration-normal`) for border/shadow transitions on cards.\n\nThe skill card uses `duration-fast` (150ms) because it combines color changes and a transform property into a quick, responsive interaction.\n\n## Complete Hover State Summary\n\n| Property | Default | Hover | Transition |\n|----------|---------|-------|-----------|\n| Background | `bg-surface-alt` | `hover:bg-surface` | `transition-all` |\n| Border | `border-border` | `border-border-accent` | `duration-fast` (150ms) |\n| Transform | None | `hover:-translate-y-0.5` | `ease-default` |\n\n## Angular Component Usage\n\n```html\n<div class=\"bg-surface-alt border border-border rounded-md p-4 min-h-[72px]\n            hover:bg-surface hover:border-border-accent hover:-translate-y-0.5\n            transition-all duration-fast\">\n  <span class=\"font-mono text-sm text-primary\">{{ skill.name }}</span>\n  <app-skill-progress-bar [value]=\"skill.level\" />\n</div>\n```\n\n---\n\n**Reference:** `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/04-components/skill-card/spec.md`\n"}], "grading": {"eval_id": 0, "eval_name": "lookup-hover-classes", "configuration": "without_skill", "expectations": [{"text": "Mentions hover:bg-surface as the hover background class", "passed": true, "evidence": "Lines 9 and 14 show the exact class: `hover:bg-surface`"}, {"text": "Mentions hover:border-border-accent as the hover border class", "passed": true, "evidence": "Lines 9 and 15 show the exact class: `hover:border-border-accent`"}, {"text": "Mentions hover:-translate-y-0.5 for the lift effect", "passed": true, "evidence": "Lines 9 and 16 show the exact class: `hover:-translate-y-0.5` with description of 2px lift"}, {"text": "Identifies duration-fast (150ms) as the transition timing", "passed": true, "evidence": "Line 18 explicitly states: 'duration-fast' = '**150ms**', confirmed on line 22"}, {"text": "References the skill-card spec file or interaction-transitions as the source", "passed": true, "evidence": "Line 52 references the skill-card spec file path: '/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/04-components/skill-card/spec.md'"}]}}, {"id": "eval-1-create-new-spec-with_skill", "prompt": "Create a component spec for a social-links component (row of icon links in sidebar bottom, 24x24, text-muted default, text-accent hover, gap-3).", "eval_id": 1, "outputs": [{"name": "spec.md", "type": "text", "content": "---\ntitle: \"Component: Social Links\"\naliases:\n  - social links\n  - app-social-links\n  - social icons\ntags:\n  - design-system\n  - component\n  - sidebar\ndate: 2026-04-01\nsource: \"[[design-system#5. Component Library]]\"\n---\n\n# Component: Social Links\n\nSee also: [[color-palette]] | [[spacing-and-sizing]] | [[interaction-transitions]]\n\n## Purpose\n\nDisplays a row of icon links (GitHub, LinkedIn, email) at the bottom of the sidebar. Provides quick access to social profiles and contact options.\n\n## Anatomy\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  [icon] [icon] [icon]    \u2502  \u2190 24\u00d724 icons, gap-3 between them\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n## Tailwind Classes\n\n```html\n<div class=\"flex gap-3\">\n  <!-- GitHub link -->\n  <a href=\"https://github.com/...\"\n     class=\"w-6 h-6 text-muted hover:text-accent\n            transition-colors duration-fast\n            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base\n            rounded-sm\">\n    <svg><!-- GitHub icon --></svg>\n  </a>\n\n  <!-- LinkedIn link -->\n  <a href=\"https://linkedin.com/...\"\n     class=\"w-6 h-6 text-muted hover:text-accent\n            transition-colors duration-fast\n            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base\n            rounded-sm\">\n    <svg><!-- LinkedIn icon --></svg>\n  </a>\n\n  <!-- Email link -->\n  <a href=\"mailto:...\"\n     class=\"w-6 h-6 text-muted hover:text-accent\n            transition-colors duration-fast\n            focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base\n            rounded-sm\">\n    <svg><!-- Email icon --></svg>\n  </a>\n</div>\n```\n\n| Property        | Tailwind classes / value    |\n|-----------------|----------------------------|\n| Container       | `flex gap-3`               |\n| Icon size       | `w-6 h-6`                  |\n| Default color   | `text-muted`               |\n| Gap between     | `gap-3` (12px)             |\n\n## States\n\n| State   | Visual change                          |\n|---------|----------------------------------------|\n| Default | `text-muted`                           |\n| Hover   | `text-accent`                          |\n| Focus   | Focus ring visible: `ring-accent`      |\n| Active  | Same as hover (accent color)           |\n\n## Rules\n\n> [!info] Design constraint\n> - Icons are exactly 24\u00d724px (`w-6 h-6`).\n> - Default color is `text-muted` for subtle appearance in sidebar context.\n> - Hover state transitions to `text-accent` to indicate interactivity.\n> - Gap between icons is always `gap-3` (12px).\n> - All links must have `rounded-sm` for consistency with other interactive elements.\n\n## Accessibility\n\n- Each link has an `aria-label` describing the destination (e.g., \"Visit my GitHub profile\")\n- All links are keyboard navigable with visible focus ring via `focus-visible`\n- Icons are wrapped in semantic `<a>` tags with proper `href` attributes\n- Focus ring uses `ring-offset-base` for dark theme compatibility\n\n## Angular Tag\n\n```html\n<app-social-links />\n```\n"}], "grading": {"eval_id": 1, "eval_name": "create-new-spec", "configuration": "with_skill", "expectations": [{"text": "Spec has correct YAML frontmatter with title, aliases, tags, and date fields", "passed": true, "evidence": "Lines 1-12 contain all required frontmatter: title 'Component: Social Links', aliases array, tags array, and date 2026-04-01"}, {"text": "Includes an ASCII anatomy diagram showing the row layout", "passed": true, "evidence": "Lines 25-29 show ASCII diagram depicting the icon row with 24\u00d724 icons and gap-3 spacing"}, {"text": "Uses only design system tokens (text-muted, text-accent, gap-3) \u2014 no raw hex or pixel values", "passed": true, "evidence": "All Tailwind classes in lines 34-61 use tokens: text-muted, text-accent, gap-3, w-6, h-6, transition-colors, duration-fast, focus-visible:ring-2, ring-accent, ring-offset-2, ring-offset-base"}, {"text": "Includes a states table with at least Default, Hover, and Focus states", "passed": true, "evidence": "Lines 71-78 show states table with Default, Hover, Focus, and Active states clearly defined"}, {"text": "Includes accessibility section with aria-label guidance for icon links", "passed": true, "evidence": "Lines 89-94 contain dedicated Accessibility section mentioning aria-label for links, keyboard navigation with focus-visible, semantic <a> tags, and focus ring for dark theme"}, {"text": "Includes Angular tag section with <app-social-links> usage example", "passed": true, "evidence": "Lines 96-100 show Angular Tag section with <app-social-links /> component tag"}, {"text": "Uses [[wikilink]] syntax for cross-references (not markdown links)", "passed": true, "evidence": "Line 17 uses wikilink syntax: [[color-palette]], [[spacing-and-sizing]], [[interaction-transitions]]"}]}}, {"id": "eval-1-create-new-spec-without_skill", "prompt": "Create a component spec for a social-links component (row of icon links in sidebar bottom, 24x24, text-muted default, text-accent hover, gap-3).", "eval_id": 1, "outputs": [{"name": "spec.md", "type": "text", "content": "---\ntitle: \"Component: app-social-links\"\naliases:\n  - social links\n  - social icons\n  - app-social-links\ntags:\n  - design-system\n  - component\n  - sidebar\ndate: 2026-04-01\nsource: \"[[design-system#5. Component Library]]\"\n---\n\n# Component: app-social-links\n\nSee also: [[desktop-layout#Sidebar Contents (top \u2192 bottom)]] | [[interaction-transitions]]\n\n## Purpose\n\nRow of icon links positioned at the bottom of the sidebar. Provides quick access to social profiles (GitHub, LinkedIn, email). Each icon is 24x24 with subtle styling that emphasizes on interaction.\n\n## Anatomy\n\n```\n[GitHub icon] [LinkedIn icon] [Email icon]\n```\n\n- Container: flexbox row with horizontal spacing\n- Icon: 24x24px SVG, `text-muted` default state\n- Link: wraps icon, `text-accent` on hover\n- Spacing: `gap-3` between icons\n\n## Tailwind Classes\n\n```html\n<div class=\"flex items-center gap-3\">\n  <a href=\"https://github.com/kacperpilkowski\"\n     class=\"inline-flex items-center justify-center w-6 h-6\n            text-muted hover:text-accent\n            transition-colors duration-fast\"\n     aria-label=\"GitHub\">\n    <svg class=\"w-6 h-6\" fill=\"currentColor\">\n      <!-- GitHub icon -->\n    </svg>\n  </a>\n\n  <a href=\"https://linkedin.com/in/kacperpilkowski\"\n     class=\"inline-flex items-center justify-center w-6 h-6\n            text-muted hover:text-accent\n            transition-colors duration-fast\"\n     aria-label=\"LinkedIn\">\n    <svg class=\"w-6 h-6\" fill=\"currentColor\">\n      <!-- LinkedIn icon -->\n    </svg>\n  </a>\n\n  <a href=\"mailto:kacperpilkowski@gmail.com\"\n     class=\"inline-flex items-center justify-center w-6 h-6\n            text-muted hover:text-accent\n            transition-colors duration-fast\"\n     aria-label=\"Email\">\n    <svg class=\"w-6 h-6\" fill=\"currentColor\">\n      <!-- Email icon -->\n    </svg>\n  </a>\n</div>\n```\n\n## States\n\n| State   | Classes                                      |\n|---------|----------------------------------------------|\n| Default | `text-muted`                                 |\n| Hover   | `text-accent`                                |\n| Focus   | `ring-2 ring-accent ring-offset-2 ring-offset-base` |\n\n## Icon Specifications\n\n- **Size**: 24x24px (`w-6 h-6`)\n- **Color**: `currentColor` (inherits from parent text color)\n- **Format**: SVG\n- **Icons**: GitHub, LinkedIn, Email (mail envelope)\n\n## Mobile Adaptation\n\nRemains as horizontal row on all breakpoints; icons and gap scale proportionally.\n\n## Angular Tag\n\n```html\n<app-social-links />\n```\n"}], "grading": {"eval_id": 1, "eval_name": "create-new-spec", "configuration": "without_skill", "expectations": [{"text": "Spec has correct YAML frontmatter with title, aliases, tags, and date fields", "passed": true, "evidence": "Lines 1-12 contain all required frontmatter: title 'Component: app-social-links', aliases array, tags array, date 2026-04-01, and source field"}, {"text": "Includes an ASCII anatomy diagram showing the row layout", "passed": true, "evidence": "Lines 25-27 show ASCII diagram: '[GitHub icon] [LinkedIn icon] [Email icon]' with description of layout"}, {"text": "Uses only design system tokens (text-muted, text-accent, gap-3) \u2014 no raw hex or pixel values", "passed": true, "evidence": "All Tailwind classes in lines 36-67 use tokens: flex, items-center, gap-3, inline-flex, justify-center, w-6, h-6, text-muted, text-accent, transition-colors, duration-fast, ring-2, ring-accent, ring-offset-2, ring-offset-base"}, {"text": "Includes a states table with at least Default, Hover, and Focus states", "passed": true, "evidence": "Lines 70-76 show states table with Default, Hover, and Focus states clearly defined"}, {"text": "Includes accessibility section with aria-label guidance for icon links", "passed": false, "evidence": "While aria-label is shown in code examples (lines 40-41, 50-51, 61-62), there is no dedicated Accessibility section heading or guidance text. The spec is missing a formal accessibility section as required."}, {"text": "Includes Angular tag section with <app-social-links> usage example", "passed": true, "evidence": "Lines 89-93 show Angular Tag section with <app-social-links /> component tag"}, {"text": "Uses [[wikilink]] syntax for cross-references (not markdown links)", "passed": true, "evidence": "Line 17 uses wikilink syntax: [[desktop-layout#Sidebar Contents (top \u2192 bottom)]] and [[interaction-transitions]]"}]}}, {"id": "eval-2-cross-reference-with_skill", "prompt": "I need to understand the full mobile experience for the skills section. How does it look on mobile, what animations fire, and are there any special accessibility concerns?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "---\ntitle: Mobile Skills Section Experience \u2014 Complete Analysis\naliases:\n  - mobile skills experience\n  - mobile skills flow\ntags:\n  - design-system\n  - mobile\n  - skills\n  - analysis\ndate: 2026-04-01\n---\n\n# Mobile Skills Section Experience \u2014 Complete Analysis\n\nThis document synthesizes the full mobile experience for the skills section by cross-referencing layout specs, component specs, animations, and accessibility requirements from the design system.\n\n---\n\n## 1. Mobile Layout Context\n\n### Intro Panel First\nOn mobile (< 768px), the user journey begins with a **full-screen intro panel**:\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  INTRO PANEL (full screen)     \u2502\n\u2502                                \u2502\n\u2502  [Language switcher]           \u2502\n\u2502  [Avatar]                      \u2502\n\u2502  [Name]                        \u2502\n\u2502  [Role]                        \u2502\n\u2502  [Social links]                \u2502\n\u2502  [CTA button]                  \u2502\n\u2502                                \u2502\n\u2502  [\u2193 bouncing chevron]          \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n          \u2195 scroll\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  MAIN CONTENT                  \u2502\n\u2502  [Section: about me_]          \u2502\n\u2502  [Section: skills]             \u2502\n\u2502  [Section: experience]         \u2502\n\u2502  ...                           \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n**Key behaviours:**\n- The sidebar is **not fixed** \u2014 it becomes a full-screen intro panel part of the normal page flow\n- Content sits directly below in document flow; no special JS needed\n- As the user scrolls, the intro slides up naturally\n- The bouncing chevron with \"scroll down\" text hints there's more content below\n- Background constellation animation runs behind this panel (with reduced dot count)\n\n### When Skills Section Appears\nThe skills section is the second major section on the page (after \"About me\"). It appears below the intro and other content as the user scrolls down.\n\n---\n\n## 2. Skills Grid Layout on Mobile\n\n### Grid Sizing\nOn desktop/tablet, the skills grid uses:\n```\ngrid-cols-[repeat(auto-fill,minmax(180px,1fr))]\n```\n\n**On mobile (< 768px), this switches to:**\n```\ngrid-cols-[repeat(auto-fill,minmax(140px,1fr))]\n```\n\nThis creates a **tighter grid** with narrower cards \u2014 typically 2\u20133 columns depending on device width.\n\n### Grid Container\n```html\n<div class=\"grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4\">\n  <!-- skill cards -->\n</div>\n```\n\n- **Gap:** `gap-4` (16px between cards)\n- **Auto-flow:** Cards naturally wrap as available space shrinks\n- **Responsive:** No media query needed \u2014 the flexible grid handles it\n\n---\n\n## 3. Skill Card Anatomy on Mobile\n\nEach card in the grid displays:\n\n```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  TypeScript              \u2502  \u2190 font-mono, text-sm\n\u2502  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591  90%         \u2502  \u2190 app-skill-progress-bar\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n### Card Tailwind Classes\n```html\n<div class=\"bg-surface-alt border border-border rounded-md p-4 min-h-[72px]\n            hover:bg-surface hover:border-border-accent hover:-translate-y-0.5\n            transition-all duration-fast\">\n  <!-- Skill name -->\n  <span class=\"font-mono text-sm text-primary\">{{ skill.name }}</span>\n\n  <!-- Progress bar -->\n  <app-skill-progress-bar [value]=\"skill.level\" />\n</div>\n```\n\n| Property | Value |\n|----------|-------|\n| Background | `bg-surface-alt` |\n| Border | `border border-border` |\n| Border radius | `rounded-md` |\n| Padding | `p-4` |\n| Min height | `min-h-[72px]` |\n\n### Card States on Mobile\n\n| State | Visual Change |\n|-------|---------------|\n| **Default** | `bg-surface-alt`, `border-border`, static position |\n| **Hover** (touch \u2192 visual feedback) | `bg-surface`, `border-border-accent`, `-translate-y-0.5` |\n| **Focus** | Same as hover + focus ring for keyboard navigation |\n| **Hidden** | `opacity-0 scale-95` (during search filtering or collapse) |\n\n**Transition timing:** `duration-fast` (150ms) \u2014 quick enough for mobile interaction feedback.\n\n---\n\n## 4. Progress Bar Styling\n\nInside each skill card, the progress bar uses:\n\n```html\n<div class=\"mt-2 flex items-center gap-3\">\n  <!-- Track -->\n  <div class=\"flex-1 h-2.5 bg-bar-track rounded-sm overflow-hidden\">\n    <!-- Filled portion -->\n    <div class=\"h-full bg-bar-filled rounded-sm transition-all duration-normal\"\n         [style.width.%]=\"skill.level\">\n    </div>\n  </div>\n  <!-- Percentage label -->\n  <span class=\"font-mono text-xs text-muted w-8 text-right\">{{ value }}%</span>\n</div>\n```\n\n**Terminal aesthetic:**\n- Filled: `bg-bar-filled` (#e91e8c \u2014 accent pink)\n- Track: `bg-bar-track` (#2a2f42 \u2014 dark gray)\n- Height: `h-2.5` (10px)\n- Label: right-aligned percentage, `font-mono text-xs text-muted`\n\n---\n\n## 5. Animations on Mobile\n\n### 5.1 Scroll-Triggered Section Entry\n\nWhen the skills section enters the viewport (via Intersection Observer, threshold 0.15), all cards animate in:\n\n```\nAnimation: fade-in-up\nFrom:      opacity: 0, translateY(24px)\nTo:        opacity: 1, translateY(0)\nDuration:  500ms\nEasing:    cubic-bezier(0.4, 0, 0.2, 1)\n```\n\nThis orientation animation signals to the user that a new section is appearing as they scroll.\n\n### 5.2 Search Input \u2014 Live Filtering\n\nOn mobile, the search input is **inline** (not overlaid), and filtering happens instantly:\n\n```\nUser types in search bar\n  \u2193\nCards matching the query stay visible\nCards NOT matching the query fade out: opacity-0 scale-95, duration-normal\n  \u2193\nUser clears input\n  \u2193\nAll cards fade back in\n```\n\n**Filtered card animation:**\n- Duration: `duration-normal` (300ms)\n- Easing: `ease-default`\n- Fade + scale effect provides visual feedback without jarring snaps\n\n### 5.3 Show More / Show Less Expansion\n\nDefault state: **18 skills visible** (3 rows \u00d7 6 cols on desktop; 2\u20133 cols on mobile = ~6\u20139 visible initially).\n\nWhen user taps \"Show more\":\n\n```\nClick \"Show more\"\n  \u2193\nGrid max-height animates: 240px \u2192 2000px (300ms, spring easing)\n  \u2193\nHidden cards fade in: opacity-0 scale-95 \u2192 opacity-100 scale-100\n  \u2193\nStagger: each card delayed by index \u00d7 20ms\n  \u2193\nLabel changes to \"Show less\"\n```\n\n**Angular trigger:** `@expandCollapse` with `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring curve) creates a smooth, bouncy reveal.\n\nOn \"Show less\", the grid collapses back to the initial height \u2014 **no stagger on collapse** (instant reverse).\n\n### 5.4 Card Hover \u2192 Touch Feedback\n\nOn touch devices, card hover state is triggered by interaction:\n\n```\nUser hovers/taps card\n  \u2193\nBorder: border-border \u2192 border-border-accent\nBackground: bg-surface-alt \u2192 bg-surface\nPosition: -translate-y-0.5 (slight upward shift)\n  \u2193\nDuration: 150ms (duration-fast) \u2014 snappy feedback\n  \u2193\nAll transitioned via transition-all\n```\n\n---\n\n## 6. Reduced Motion Compliance\n\n> [!danger] Hard requirement\n> All animations must respect `prefers-reduced-motion`. This is non-negotiable for accessibility.\n\n### What Changes When Reduced Motion is Set\n\n| Animation | Normal Behavior | Reduced Motion Behavior |\n|-----------|-----------------|------------------------|\n| Section entry | fade-in-up 500ms | Animation instant (0.01ms) |\n| Card filter/show-more | 300ms expand + stagger | Instant height/opacity change |\n| Card hover | 150ms transition | Instant color/border change |\n| Skill progress bar fill | Animates 0% \u2192 value | Width set instantly |\n| Search overlay | slide-down 300ms | Instant appear/disappear |\n| Scroll chevron | Bouncing bounce animation | Static visible indicator |\n\n**Implementation:** Global CSS rule:\n```css\n@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n  }\n}\n```\n\nSpecial component handling for:\n- **Skill progress bar:** Detect `prefers-reduced-motion` and set width without CSS animation\n- **Chevron indicator:** Render as static visible (no bounce)\n- **Network background:** Pause canvas animation loop\n\n---\n\n## 7. Accessibility Concerns for Mobile\n\n### 7.1 Keyboard Navigation\n\nAll interactive elements must be **keyboard accessible**:\n\n- Search input: Focusable via `Tab`, operable with text input\n- Search results: Filterable by keyboard\n- \"Show more\" button: Focusable, operable by `Enter`/`Space`\n- All cards: Focusable (though they may be decorative in some contexts)\n\n**Focus ring:** All interactive elements must show a visible focus ring:\n```\nfocus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ring-offset-base\n```\n\nUse `focus-visible` (not `focus`) to avoid showing the ring on mouse click.\n\n### 7.2 Screen Reader Support\n\n**Skill cards and progress bars:**\n- Progress bar: `role=\"meter\"`, `aria-valuenow`, `aria-valuemin=\"0\"`, `aria-valuemax=\"100\"`\n- Aria-label: \"C# proficiency: 80%\" (example)\n- Skill name: Semantic `<span>` or strong element for emphasis\n\n**Search input:**\n- Placeholder text: \"Search by skill...\" (not sufficient alone for a11y)\n- Label: Either visible or `aria-label` needed\n- Input type: `type=\"text\"` with proper autocomplete attributes\n\n**Show more / Show less button:**\n- Text is self-explanatory; aria-label optional but helpful if toggling an icon\n- `aria-expanded` attribute if toggling hidden content\n\n### 7.3 Color & Contrast\n\n- **Body text** (`text-primary` on `bg-base`): contrast ratio \u2265 4.5:1\n- **Muted text** (`text-muted` on `bg-base`): contrast ratio \u2265 3:1 (large) or 4.5:1 (small)\n- **Accent on dark bg** (`text-accent` on `bg-base`): verify readability\n- **No information by color alone:** Skill progress bars also show percentage label (not just color)\n\n### 7.4 Semantic HTML\n\n- Use `<input type=\"text\">` for search, not a styled `<div>`\n- Use `<button>` for \"Show more\"/\"Show less\", not a link\n- Skill cards as `<div role=\"listitem\">` or semantic article/card wrapper\n- Proper heading hierarchy for section title\n\n### 7.5 Touch Target Sizing\n\nOn mobile, interactive elements should be \u2265 48px \u00d7 48px for easy tapping:\n\n- **Skill cards:** `min-h-[72px]` + full width of grid cell \u2713 (sufficient)\n- **Search input:** Height should be \u2265 40px (typically 44\u201348px) \u2713\n- **\"Show more\" button:** Should be wrapped in a properly-sized button or link \u2713\n\n---\n\n## 8. Mobile-Specific Behaviors\n\n### 8.1 Search on Mobile\n\n- **Placement:** Inline, above the grid (not floating overlay like the article search)\n- **Interaction:** Live filtering as the user types\n- **No network call:** Client-side filtering only\n- **Empty state:** \"No skills matching '...'\" message if no results\n- **Responsiveness:** Input width adjusts to screen width; grid tightens as space allows\n\n### 8.2 Progressive Disclosure\n\n**Default state on first load:**\n- 18 skills visible (but on mobile with 2\u20133 cols, likely ~6\u20139 cards are initially visible)\n- Rest are collapsed below the fold, hidden until \"Show more\" is tapped\n\n**Why?** Reduces cognitive load on mobile \u2014 lets the user see the skills section without overwhelming vertical scroll.\n\n### 8.3 Touch Interactions\n\n- **Tap card:** Hover state triggers, giving visual feedback\n- **Tap \"Show more\":** Grid animates open, new cards fade in with stagger (spring easing)\n- **Tap search:** Keyboard appears (OS-managed), focus highlights input\n- **Swipe/scroll:** Native scroll behavior; no horizontal scroll on grid\n\n---\n\n## 9. Complete Mobile Skills Section Flow\n\n```\nUser lands on /:lang/ (CV page)\n  \u2193\n[Mobile view < 768px]\n  \u2193\nFull-screen intro panel renders\nBouncing chevron at bottom (\"scroll down\")\n  \u2193\nUser scrolls down\n  \u2193\nIntro slides up naturally\nMain content sections appear:\n  - About me section animates in (fade-in-up)\n  - Dotted line separator (wave animation if present)\n  \u2193\nSkills section enters viewport\n  \u2193\nAll visible cards fade in: opacity 0 \u2192 1, translateY(24px) \u2192 0 (500ms)\nGrid layout: 2\u20133 columns, minmax(140px, 1fr) spacing\n~6\u20139 cards visible initially, rest collapsed\n  \u2193\nUser interaction options:\n\nOption A: Search\n  - Type in search input\n  - Cards matching query stay visible, others fade out (300ms)\n  - Type clears, cards fade back in\n\nOption B: Show More\n  - Tap \"Show more\" button\n  - Grid max-height expands (300ms, spring easing)\n  - Hidden cards fade in with stagger (20ms between cards)\n  - Label changes to \"Show less\"\n\nOption C: Hover/Tap Cards\n  - Card background/border shifts to accent color (150ms)\n  - Subtle upward translation (-translate-y-0.5)\n  - No click behavior (cards are decorative in this context, or link to detail page \u2014 TBD)\n  \u2193\nUser continues scrolling\nSkills section slides up, next sections appear\n```\n\n---\n\n## 10. Summary: Key Takeaways\n\n| Aspect | Mobile Behavior |\n|--------|-----------------|\n| **Grid layout** | `grid-cols-[repeat(auto-fill,minmax(140px,1fr))]` \u2192 2\u20133 columns |\n| **Initial visible count** | ~6\u20139 cards (vs. 18 on desktop) due to narrower cards |\n| **Card hover state** | Enabled on touch; provides visual feedback with 150ms transition |\n| **Search** | Inline, live filtering, no overlay |\n| **Show more animation** | Max-height expand + stagger fade-in (spring easing) |\n| **Section entry** | fade-in-up on scroll (500ms, cubic-bezier) |\n| **Reduced motion** | All animations instant (0.01ms); chevron static; progress bar width instant |\n| **Focus ring** | Visible on all interactive elements; `focus-visible` only |\n| **Touch targets** | Cards \u2265 72px tall; input \u2265 40px; meets 48px minimum |\n| **Semantic HTML** | `<input>`, `<button>`, `role=\"meter\"` on progress bars |\n| **Progress bar** | Fills on load (or instant if reduced motion); shows % label for contrast |\n| **Accessibility** | Keyboard nav, screen reader support, color + label for info, reduced motion compliance |\n\n---\n\n## Related Design System Files\n\n- [[02-layout/mobile-layout]] \u2014 Full intro panel and mobile layout architecture\n- [[04-components/skills-section/spec]] \u2014 Search, show more, grid layout\n- [[04-components/skill-card/spec]] \u2014 Card states, hover, touch feedback\n- [[04-components/skill-progress-bar/spec]] \u2014 Progress bar styling and animation\n- [[05-animations/keyframes]] \u2014 fade-in-up, @expandCollapse trigger definitions\n- [[05-animations/motion-rules]] \u2014 Reduced motion compliance and animation principles\n- [[05-animations/interaction-transitions]] \u2014 Hover, focus, and transition timing\n- [[06-ux-flows/cv-page-flow]] \u2014 Skill search, show more, and scroll reveal flows\n- [[08-accessibility/a11y-checklist]] \u2014 Keyboard nav, screen readers, color contrast, semantic HTML\n"}], "grading": {"eval_id": 2, "eval_name": "cross-reference-navigation", "configuration": "with_skill", "expectations": [{"text": "References mobile-layout.md and describes the grid change (single column or smaller minmax)", "passed": true, "evidence": "Section 1 (lines 20-84) references mobile layout and explicitly describes grid change from minmax(180px,1fr) desktop to minmax(140px,1fr) mobile"}, {"text": "Describes at least 2 specific animations: section entry (fade-in-up) and show-more expand", "passed": true, "evidence": "Section 5 (lines 159-231) describes: fade-in-up animation (lines 166-171), search filtering animation (lines 175-193), show-more expansion (lines 195-215), and card hover animation (lines 217-230)"}, {"text": "Mentions prefers-reduced-motion requirement for all animations", "passed": true, "evidence": "Section 6 (lines 235-260) has extensive coverage of prefers-reduced-motion with a danger callout, detailed table mapping animations to reduced motion behavior, and CSS implementation"}, {"text": "Synthesizes info from at least 3 different vault files", "passed": true, "evidence": "Lines 420-430 reference 8 different design system files: mobile-layout, skills-section spec, skill-card spec, skill-progress-bar spec, keyframes, motion-rules, interaction-transitions, cv-page-flow, and a11y-checklist"}, {"text": "Mentions role=meter and aria attributes for the skill progress bar", "passed": true, "evidence": "Section 7.2 (lines 289-291) explicitly mentions: role='meter', aria-valuenow, aria-valuemin='0', aria-valuemax='100', and aria-label attributes for screen reader support"}]}}, {"id": "eval-2-cross-reference-without_skill", "prompt": "I need to understand the full mobile experience for the skills section. How does it look on mobile, what animations fire, and are there any special accessibility concerns?", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Mobile Skills Section Experience \u2014 Complete Design Analysis\n\n## Overview\n\nThe mobile skills section delivers a focused, progressive experience that maintains the terminal aesthetic while adapting to smaller screens. The section appears as the third section in the scrollable content flow, after the full-screen intro panel and the \"About me\" section.\n\n---\n\n## Mobile Layout & Grid Structure\n\n### Grid Dimensions\nOn mobile (`< 768px`), the skills grid uses:\n```\ngrid-cols-[repeat(auto-fill,minmax(140px,1fr))]\n```\n\nThis creates a responsive grid that adapts to viewport width:\n- **Small phones (375px\u2013420px)**: typically 2\u20133 columns\n- **Larger phones (480px\u2013600px)**: typically 3\u20134 columns\n- **Near tablet (700px\u2013768px)**: 4\u20135 columns\n\nGrid gap remains consistent at `gap-4` (16px) across all breakpoints.\n\n### Container\nThe skills section itself follows mobile-layout conventions:\n- Full width with horizontal padding: `px-6` or `px-8`\n- No fixed sidebar (sidebar is hidden with `max-md:hidden`)\n- Sits within the normal document flow below the intro panel\n- Uses section heading (`app-section-heading`) before grid\n\n### Search Input\nThe search bar appears inline above the grid:\n- Full width: `w-full`\n- Styling: `bg-surface-alt`, `border border-border`, `rounded-md`, `pl-10 pr-4 py-2`\n- Text: `font-mono text-sm`, `placeholder:text-muted`\n- Focus state: `focus:border-border-accent focus:outline-none`\n- Transition: `transition-colors duration-fast` (150ms)\n\n**Behavior on mobile:**\n- No overlay \u2014 input sits directly above the grid\n- Keyboard does NOT dismiss automatically on mobile (user taps outside or scrolls)\n- Input remains focused and visible while filtering\n\n---\n\n## Skill Card Appearance\n\n### Card Dimensions\nEach skill card has:\n- **Min height**: `min-h-[72px]` (consistent across breakpoints)\n- **Padding**: `p-4` (16px)\n- **Background**: `bg-surface-alt`\n- **Border**: `border border-border`, `rounded-md`\n\nAt 140px minimum width (mobile), cards appear compact but readable.\n\n### Card Content\n```\n[Skill name in font-mono, text-sm]\n[Progress bar \u2014 see below]\n```\n\n- Skill name: monospace font, small size, `text-primary`\n- Progress bar positioned below with `mt-2`\n\n### Card States\n| State     | Visual                                                          |\n|-----------|----------------------------------------------------------------|\n| **Default** | `bg-surface-alt`, `border-border`, no shadow                  |\n| **Hover**   | `bg-surface`, `border-border-accent`, `-translate-y-0.5`, shadow appears |\n| **Focus**   | Same as hover + `ring-2 ring-accent ring-offset-2` (keyboard)  |\n| **Hidden**  | `opacity-0 scale-95` (when filtered out or collapsed)          |\n\nOn touch devices (typical mobile), hover states are not triggered. Instead:\n- Cards show focus ring only on keyboard navigation\n- Tap/touch does not trigger hover state\n- Cards lift visually on focus (keyboard users only)\n\n---\n\n## Skill Progress Bar\n\n### Visual Design\nThe progress bar uses a terminal-style aesthetic:\n```\n\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591  80%\n```\n\n- **Filled track**: `bg-bar-filled` (#e91e8c, accent pink)\n- **Empty track**: `bg-bar-track` (#2a2f42, dark blue-gray)\n- **Height**: `h-2.5` (10px)\n- **Label**: percentage (0\u2013100), `font-mono text-xs text-muted`, right-aligned\n\n### Layout\n```html\n<div class=\"mt-2 flex items-center gap-3\">\n  <div class=\"flex-1 h-2.5 bg-bar-track rounded-sm overflow-hidden\">\n    <div class=\"h-full bg-bar-filled rounded-sm transition-all duration-normal\"\n         [style.width.%]=\"skill.level\">\n    </div>\n  </div>\n  <span class=\"font-mono text-xs text-muted w-8 text-right\">{{ value }}%</span>\n</div>\n```\n\n- Bar fills: `flex-1` (takes remaining space)\n- Percentage label: fixed width (`w-8`), right-aligned\n- Gap between: `gap-3` (12px)\n\n### Accessibility\nEach progress bar has ARIA attributes:\n```html\n<div role=\"meter\"\n     aria-valuenow=\"80\"\n     aria-valuemin=\"0\"\n     aria-valuemax=\"100\"\n     aria-label=\"TypeScript proficiency: 80%\">\n```\n\nScreen readers announce: \"TypeScript proficiency: 80%, meter\"\n\n---\n\n## Animations\n\n### Initial Load Animation\n\nWhen the skills section enters the viewport (Intersection Observer, threshold: 0.15):\n\n1. **Section enters**: `animate-fade-in-up` (0.5s, ease-in-out)\n   - Starts at `opacity: 0, transform: translateY(24px)`\n   - Animates to `opacity: 1, transform: translateY(0)`\n   - Uses `cubic-bezier(0.4, 0, 0.2, 1)` easing\n\n2. **Progress bar fill**: When card renders\n   - Bar width animates from 0% \u2192 actual value\n   - Duration: `duration-normal` (300ms)\n   - Uses `transition-all duration-normal`\n   - **Only on first load** \u2014 progress bars do not re-animate on subsequent interactions\n\n### Search Interaction Animation\n\nWhen user types in the search input:\n\n1. **Matching skills**: Stay visible, no animation\n2. **Non-matching skills**: Fade out and scale down\n   - Animation: `opacity-0 scale-95`\n   - Duration: `duration-normal` (300ms)\n   - Transition applied via Angular/CSS\n3. **Clearing search**: Skills fade back in\n   - Animation: `opacity-100 scale-100`\n   - Duration: `duration-normal` (300ms)\n\nNo \"no results\" message animation \u2014 it appears/disappears based on filter state.\n\n### Show More / Show Less Animation\n\nWhen user clicks \"Show more\":\n\n1. **Grid container**: Height expands\n   - Trigger: `@expandCollapse` Angular animation\n   - From state: `maxHeight: 240px` (initial visible state)\n   - To state: `maxHeight: 2000px` (full grid)\n   - Duration: 300ms\n   - Easing: `cubic-bezier(0.34, 1.56, 0.64, 1)` (spring-like)\n\n2. **Hidden cards**: Fade in and scale up with stagger\n   - Animation: `opacity-0 scale-95 \u2192 opacity-100 scale-100`\n   - Each card delays by `index * 20ms`\n   - Total stagger spread: ~80\u2013200ms depending on card count\n   - Duration: 300ms (overlaps with container expand)\n\n3. **Show less**: Grid collapses\n   - Reverse animation (no stagger on collapse)\n   - Duration: 300ms\n   - Cards fade out instantly as maxHeight decreases\n\n---\n\n## Full Mobile Scrolling Experience\n\n### Sequence on First Load\n\n```\n1. Browser loads page\n   \u2193\n2. Full-screen intro panel renders with profile info\n   \u251c\u2500 Language switcher (top-left)\n   \u251c\u2500 Avatar image\n   \u251c\u2500 Name + Role\n   \u251c\u2500 Social links + CTA button\n   \u2514\u2500 Bouncing chevron + \"scroll down\" text at bottom\n   \u2193\n3. User sees only intro; skills section NOT visible yet\n   \u2193\n4. User scrolls down (or swipes on mobile)\n   \u251c\u2500 Intro panel slides up naturally (part of page flow)\n   \u251c\u2500 Background canvas continues animating (particle drift)\n   \u2514\u2500 Main content appears below\n   \u2193\n5. \"About me_\" section appears, animates in with fade-in-up\n   \u2193\n6. User continues scrolling\n   \u2193\n7. Skills section header appears, triggers animate-fade-in-up\n   \u251c\u2500 Section heading renders with blinking cursor (first time only)\n   \u251c\u2500 Search input appears\n   \u251c\u2500 First 18 skills (3\u00d76 grid, scaled to mobile) fade in and scale up\n   \u2514\u2500 Progress bars animate from 0% \u2192 actual value\n   \u2193\n8. All remaining sections follow (Experience, Education, Languages, Projects, Blog)\n```\n\n### User Interactions on Skills Section (Mobile)\n\n**Searching:**\n```\nUser taps search input\n  \u2193\nInput focuses (focus ring visible, keyboard appears)\n  \u2193\nUser types characters\n  \u2193\nCards filter live (no debounce)\n  \u251c\u2500 Matching cards: stay visible\n  \u2514\u2500 Non-matching: fade out + scale down (300ms)\n  \u2193\nUser clears input\n  \u2193\nAll cards fade back in (300ms)\n```\n\n**Expanding hidden skills:**\n```\nUser scrolls to \"Show more\" button (if not all 18 visible)\n  \u2193\nUser taps \"Show more\"\n  \u2193\nGrid expands (300ms spring animation)\n  \u251c\u2500 Hidden cards fade in + scale (20ms stagger per card)\n  \u2514\u2500 New content becomes visible\n  \u2193\nButton label changes to \"Show less\"\n  \u2193\nUser can tap to collapse (reverse animation)\n```\n\n---\n\n## Accessibility Considerations\n\n### Reduced Motion (Critical)\n\nMobile users with `prefers-reduced-motion: reduce` enabled receive:\n\n1. **Section animations**: Disabled entirely\n   - Sections appear instantly (no fade-in-up)\n   - No delay on entry\n\n2. **Progress bar fill**: Instant width assignment\n   - Width set to final value immediately\n   - No animation from 0% \u2192 value\n   - Still visually present and styled correctly\n\n3. **Grid expand/collapse**: Instant height change\n   - MaxHeight animates instantly (0.01ms)\n   - Cards appear/disappear with no stagger\n   - Button still functional\n\n4. **Search filter animation**: Disabled\n   - Cards appear/disappear instantly\n   - No fade/scale transitions\n\n5. **Bouncing chevron** (intro panel): Renders as static\n   - No bounce animation\n   - Still visible to guide user\n\n**Implementation**: Global CSS rule + component-level overrides\n```css\n@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n  }\n}\n```\n\n### Keyboard Navigation\n\nAll interactive elements are accessible:\n\n- **Search input**: Focusable with `Tab`\n  - Focus ring visible: `ring-2 ring-accent`\n  - Typing triggers filter\n  - `Escape` may clear input (implementation detail)\n\n- **Show more/Show less button**: Focusable with `Tab`\n  - Focus ring visible\n  - `Enter` or `Space` triggers expand/collapse\n  - State change announced if button text updates\n\n- **Skill cards**: Not focusable (content cards, not interactive)\n  - Cards do appear with focus ring in some contexts (if made interactive in future)\n\n- **Tab order**: Search input \u2192 Show more button \u2192 Next section\n\n### Screen Reader Accessibility\n\n- **Section heading**: Semantic `<h2>` (or heading level), announces \"Skills\" or similar\n  - If heading has typewriter effect on desktop, cursor is announced as text on mobile\n\n- **Search input**:\n  - Label associated via `<label>` or aria-label\n  - Placeholder visible to sighted users\n  - Screen reader announces input purpose\n\n- **Progress bars** (each card):\n  - `role=\"meter\"`\n  - `aria-label=\"Skill name proficiency: XX%\"`\n  - `aria-valuenow=\"XX\"`, `aria-valuemin=\"0\"`, `aria-valuemax=\"100\"`\n  - Announces value to screen readers\n\n- **Show more button**:\n  - Semantic `<button>` or `role=\"button\"`\n  - Text clearly states \"Show more\" or \"Show less\"\n  - No icon-only buttons; text is present\n  - Aria-expanded may indicate collapse state\n\n### Color & Contrast\n\n- **Skill names** (`text-primary` on `bg-surface-alt`): WCAG AA contrast \u2265 4.5:1\n- **Progress bar fill** (`text-bar-filled` on `bg-bar-track`): Colored blocks + percentage label\n  - Percentage label ensures information is not conveyed by color alone\n  - High contrast achieved via dark bar track + bright accent fill\n\n- **Search input text**: `text-primary` on `bg-surface-alt`, WCAG AA\n- **Muted text** (placeholder, labels): `text-muted` on `bg-surface-alt`, meets WCAG AA for large text\n\n### Mobile-Specific Concerns\n\n1. **Touch target size**: Skill cards are `min-h-[72px]` at 140px width\n   - Tappable area adequate on phones\n   - Progress bar label is text-only (not interactive)\n\n2. **Scroll position**: Search input stays at top of section\n   - Does not stick or follow user\n   - User can scroll past it to view all cards\n\n3. **Focus management**: No special focus trap on search\n   - User can tab out to next section\n\n4. **Text size**: `text-sm` (14px) for skill names, `text-xs` (12px) for progress label\n   - Readable on mobile with typical zoom levels\n   - Respects user zoom preference (no `user-select: none` or similar)\n\n5. **Orientation changes**: Grid reflows automatically\n   - `auto-fill` keyword handles portrait \u2194 landscape transitions\n   - No fixed column count; card width adjusts\n\n---\n\n## Design Tokens (Mobile Skills)\n\n### Typography\n- **Skill name**: `font-mono text-sm text-primary`\n- **Progress label**: `font-mono text-xs text-muted`\n- **Search placeholder**: `placeholder:text-muted font-mono text-sm`\n- **\"Show more\" text**: `font-mono text-sm text-muted hover:text-accent`\n\n### Colors\n- **Card background**: `bg-surface-alt` (#1a1f2e or similar dark shade)\n- **Card border**: `border-border` (#3a4156 or similar)\n- **On card hover**: `border-border-accent` (accent pink)\n- **Progress filled**: `bg-bar-filled` (#e91e8c, accent)\n- **Progress track**: `bg-bar-track` (#2a2f42, muted dark)\n- **Accent text**: `text-accent` (#e91e8c)\n\n### Spacing\n- **Grid gap**: `gap-4` (16px between cards)\n- **Card padding**: `p-4` (16px inside card)\n- **Search margin below**: `mb-6` (24px to grid)\n- **Section container padding**: `px-6` or `px-8` (24px or 32px sides)\n\n### Timing (Motion)\n- **Fade-in-up** (section entry): 500ms, `cubic-bezier(0.4, 0, 0.2, 1)`\n- **Progress bar fill**: 300ms, `transition-all duration-normal`\n- **Search filter**: 300ms, `transition opacity + scale`\n- **Show more expand**: 300ms, `cubic-bezier(0.34, 1.56, 0.64, 1)`\n- **Search input focus**: 150ms, `transition-colors duration-fast`\n\n---\n\n## Summary Table: Mobile Skills Section\n\n| Aspect | Details |\n|--------|---------|\n| **Grid columns** | 2\u20135 columns (responsive, `minmax(140px, 1fr)`) |\n| **Cards shown initially** | First 18 (if total > 18) |\n| **Search** | Inline above grid, filters live, no overlay |\n| **Show more** | Button below grid, expands with spring animation (300ms) |\n| **Entry animation** | `animate-fade-in-up` (500ms) on scroll into view |\n| **Card hover** | Not applicable on touch; focus ring on keyboard |\n| **Progress bar** | Terminal-style blocks + percentage label, animates fill on load |\n| **Reduced motion** | All animations disabled; content appears instantly |\n| **Keyboard nav** | Search \u2192 Show more \u2192 Next section (Tab order) |\n| **Screen reader** | Meter role on progress bars, semantic headings, labels |\n| **Touch targets** | Cards 72px tall, search input 32px tall (comfortable) |\n| **Scrolling** | Section scrolls into view naturally; no fixed positioning |\n\n---\n\n## Files Referenced\n\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/02-layout/mobile-layout.md` \u2014 Mobile structure and grid\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/04-components/skills-section/spec.md` \u2014 Skills section component\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/04-components/skill-card/spec.md` \u2014 Individual card design\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/04-components/skill-progress-bar/spec.md` \u2014 Progress bar anatomy\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/05-animations/keyframes.md` \u2014 Animation definitions\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/05-animations/motion-rules.md` \u2014 Motion constraints and reduced-motion\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/05-animations/interaction-transitions.md` \u2014 Hover/focus behavior\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/06-ux-flows/cv-page-flow.md` \u2014 Full page flow including mobile scroll\n- `/sessions/exciting-sleepy-shannon/mnt/About me - UI desine/08-accessibility/a11y-checklist.md` \u2014 A11y requirements for motion and keyboard\n"}], "grading": {"eval_id": 2, "eval_name": "cross-reference-navigation", "configuration": "without_skill", "expectations": [{"text": "References mobile-layout.md and describes the grid change (single column or smaller minmax)", "passed": true, "evidence": "Lines 10-22 reference mobile layout and describe grid using minmax(140px,1fr) with 2-5 responsive columns on mobile"}, {"text": "Describes at least 2 specific animations: section entry (fade-in-up) and show-more expand", "passed": true, "evidence": "Section on Animations (lines 124-176) describes: initial load animation with animate-fade-in-up (lines 126-133), search interaction animation (lines 141-154), and show-more/show-less animation with spring easing (lines 157-176)"}, {"text": "Mentions prefers-reduced-motion requirement for all animations", "passed": true, "evidence": "Section on Reduced Motion (lines 252-286) explicitly addresses prefers-reduced-motion with 5 detailed behavior changes and CSS implementation block"}, {"text": "Synthesizes info from at least 3 different vault files", "passed": true, "evidence": "Lines 413-423 reference 11 different design system files: mobile-layout, skills-section spec, skill-card spec, skill-progress-bar spec, keyframes, motion-rules, interaction-transitions, cv-page-flow, and a11y-checklist"}, {"text": "Mentions role=meter and aria attributes for the skill progress bar", "passed": true, "evidence": "Lines 318-322 explicitly mention: role='meter', aria-label, aria-valuenow, aria-valuemin, aria-valuemax with example 'TypeScript proficiency: 80%'"}]}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "ui-design-system", "skill_path": "<path/to/skill>", "executor_model": "<model-name>", "analyzer_model": "<model-name>", "timestamp": "2026-04-01T17:55:54Z", "evals_run": [], "runs_per_configuration": 3}, "runs": [], "run_summary": {"delta": {"pass_rate": "+0.00", "time_seconds": "+0.0", "tokens": "+0"}}, "notes": []}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

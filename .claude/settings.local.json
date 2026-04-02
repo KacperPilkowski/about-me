@@ -1,16 +1,27 @@
-﻿{
-    "env": {
-        "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6",
-        "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
-        "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75"
-    },
-    "permissions": {
-        "allow": [
-            "Skill(playwright-cli)",
-            "Bash(playwright-cli goto:*)",
-            "Bash(playwright-cli screenshot:*)",
-            "Bash(playwright-cli eval:*)"
-        ]
-    }
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75"
+  },
+  "permissions": {
+    "allow": [
+      "Skill(playwright-cli)",
+      "Bash(playwright-cli goto:*)",
+      "Bash(playwright-cli screenshot:*)",
+      "Bash(playwright-cli eval:*)",
+      "Bash(obsidian help:*)",
+      "Bash(echo \"Dev server started in background, PID=$!\")",
+      "Bash(playwright-cli open:*)",
+      "Bash(playwright-cli reload:*)",
+      "Bash(playwright-cli console:*)",
+      "Bash(playwright-cli network:*)",
+      "Bash(playwright-cli run-code:*)",
+      "Bash(playwright-cli snapshot:*)",
+      "Bash(playwright-cli close:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx ng:*)"
+    ]
+  }
 }

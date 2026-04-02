@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { LanguageService } from '../../core/language.service';
 
 type Lang = 'en' | 'pl';
 
@@ -9,10 +10,11 @@ type Lang = 'en' | 'pl';
   templateUrl: './language-switcher.html',
 })
 export class LanguageSwitcher {
-  protected readonly activeLang = signal<Lang>('en');
+  private readonly langService = inject(LanguageService);
+  protected readonly activeLang = this.langService.activeLang;
 
   setLang(lang: Lang): void {
-    this.activeLang.set(lang);
+    this.langService.switchLang(lang);
   }
 
   isActive(lang: Lang): boolean {

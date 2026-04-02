@@ -1,0 +1,16 @@
+{
+  "nav.say_hi": "Napisz do mnie!",
+  "section.about": "O mnie",
+  "section.skills": "Umiejętności",
+  "section.experience": "Doświadczenie",
+  "section.education": "Edukacja",
+  "section.languages": "Języki",
+  "section.projects": "Projekty",
+  "section.blog": "Blog",
+  "skills.search": "Szukaj umiejętności...",
+  "skills.show_more": "Pokaż więcej",
+  "skills.show_less": "Pokaż mniej",
+  "blog.read": "Czytaj artykuł",
+  "blog.no_results": "Brak artykułów dla '{{query}}'",
+  "scroll.down": "przewiń w dół"
+}

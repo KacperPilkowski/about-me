@@ -24,7 +24,13 @@
       "Bash(npx ng:*)",
       "Bash(playwright-cli press:*)",
       "Bash(playwright-cli resize:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "Bash(npm test:*)",
+      "Bash(npm start:*)",
+      "Read(//tmp/**)",
+      "Bash(pkill -f \"ng serve\")",
+      "Bash(npx lighthouse:*)",
+      "Bash(lighthouse:*)"
     ]
   }
 }

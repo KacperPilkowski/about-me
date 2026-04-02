@@ -8,7 +8,7 @@ tags:
   - design-system
   - decisions
   - architecture
-date: 2026-03-31
+date: 2026-04-02
 source: "[[design-system#13. Decisions Log]]"
 ---
 
@@ -90,6 +90,50 @@ This file captures design decisions that have been made and closed. Every decisi
 **Decision:** On mobile, sidebar becomes a full-screen intro panel, user scrolls to reach content. No hamburger menu. See [[mobile-layout]].
 **Rationale:** Natural scroll UX. Chevron indicator hints at content below.
 **Date:** 2026-03-31
+
+---
+
+### Network background — edge-based opacity fade
+**Decision:** Dot and line opacity fades from `0.80` at the canvas edges to `0.10` at the center, over a 250px transition zone. Static rgba values were rejected.
+**Rationale:** Flat opacity made the effect either too invisible at the center or too distracting globally. Edge fade keeps the effect decorative without drawing attention away from the content in the middle of the screen.
+**Date:** 2026-04-02
+
+See [[04-components/network-background/spec|Network Background]] for the edge opacity formula.
+
+---
+
+### Network background — canvas opacity: opacity-40
+**Decision:** The `<canvas>` element uses Tailwind class `opacity-40` (not `opacity-10` as originally spec'd).
+**Rationale:** `opacity-10` was too faint to be visible in practice. `opacity-40` provides enough contrast against the dark background while remaining non-distracting.
+**Date:** 2026-04-02
+
+---
+
+### Network background — connection threshold: 200px
+**Decision:** Dots connect when within `200px` of each other (not `120px` as originally spec'd).
+**Rationale:** 120px produced a sparse, disconnected network that looked unfinished. 200px creates a denser, more cohesive effect on all screen sizes.
+**Date:** 2026-04-02
+
+---
+
+### Network background — variable particle speed
+**Decision:** Each particle has a randomised base speed (`0.05–0.20 px/frame`) with independent x/y axis multipliers (`0.7–1.3×`). The original fixed `0.3 px/frame` was dropped.
+**Rationale:** Uniform speed makes all particles move in perfect lockstep, which looks artificial. Randomised speed adds organic variation without increasing visual noise.
+**Date:** 2026-04-02
+
+---
+
+### Network background — respawn along edges, not corner
+**Decision:** When a particle exits the top or left edge, it respawns randomly along either the entire bottom edge or the entire right edge (50/50 chance). The original "bottom-right corner" respawn was dropped.
+**Rationale:** Corner respawning caused a visible cluster of new particles appearing simultaneously in one spot. Edge respawning spreads entries naturally across the full canvas boundary.
+**Date:** 2026-04-02
+
+---
+
+### Network background — SSR canvas guard
+**Decision:** The `<canvas>` element is wrapped in `@if (isBrowser)` so it is never emitted in server-rendered HTML.
+**Rationale:** Without the guard, the server renders a `<canvas>` with no dimensions and `position: fixed` CSS not yet applied. The browser allocates block space before the CSS takes effect, causing a CLS of 1.0. The guard eliminates the element from SSR output entirely.
+**Date:** 2026-04-02
 
 ---
 

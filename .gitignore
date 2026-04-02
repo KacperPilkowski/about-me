@@ -13,5 +13,4 @@ apps/frontend/dist/
 *.tfstate.backup
 *.tfplan
 
-
-# DODO: add missing filters base on project structure.
+apps/frontend/.playwright-cli/*

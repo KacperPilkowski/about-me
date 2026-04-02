@@ -1,0 +1,15 @@
+<nav class="flex items-center gap-1 font-mono text-sm" aria-label="Language selector">
+  <a role="button" (click)="setLang('en')"
+     [class]="isActive('en')
+       ? 'text-primary cursor-default'
+       : 'text-muted hover:text-primary transition duration-fast ease-default cursor-pointer'">
+    EN
+  </a>
+  <span class="text-muted select-none mx-1">|</span>
+  <a role="button" (click)="setLang('pl')"
+     [class]="isActive('pl')
+       ? 'text-primary cursor-default'
+       : 'text-muted hover:text-primary transition duration-fast ease-default cursor-pointer'">
+    PL
+  </a>
+</nav>

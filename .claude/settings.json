@@ -16,7 +16,11 @@
             "Bash(git diff*)",
             "Bash(git log*)",
             "Bash(git add*)",
-            "Bash(git commit*)"
+            "Bash(git commit*)",
+            "Bash(ls:*)",
+            "Bash(cat:*)",
+            "Bash(grep:*)",
+            "Bash(find:*)"
         ],
         "deny": [
             "Bash(terraform apply*)",

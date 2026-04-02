@@ -1,1 +1,92 @@
-/* You can add global styles to this file, and also import other style files */
+@use "tailwindcss";
+
+/* ───────────────────────────────────────────
+   Design Tokens — Custom Theme
+   All values sourced from the UI design docs.
+   Never use raw hex/px values in components.
+─────────────────────────────────────────────*/
+@theme {
+  /* Fonts */
+  --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+
+  /* Background colors */
+  --color-base: #12151e;
+  --color-surface: #1c2030;
+  --color-surface-alt: #141720;
+
+  /* Text colors */
+  --color-primary: #e8eaf0;
+  --color-muted: #7a8099;
+  --color-inverse: #12151e;
+
+  /* Accent colors */
+  --color-accent: #e91e8c;
+  --color-accent-hover: #ff3da3;
+  --color-accent-subtle: rgba(233, 30, 140, 0.12);
+
+  /* Progress bar */
+  --color-bar-filled: #e91e8c;
+  --color-bar-track: #2a2f42;
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border-accent: #e91e8c;
+
+  /* Semantic */
+  --color-success: #4caf7d;
+  --color-warning: #f5a623;
+  --color-error: #e05c5c;
+
+  /* Sidebar widths */
+  --width-sidebar: 360px;
+  --width-sidebar-md: 280px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Box shadows */
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+  --shadow-glow-accent: 0 0 20px rgba(233, 30, 140, 0.25);
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
+  /* Transition durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* Easing functions */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ───────────────────────────────────────────
+   Global base styles
+─────────────────────────────────────────────*/
+@layer base {
+  html, body {
+    background-color: var(--color-base);
+    color: var(--color-primary);
+    font-family: var(--font-body);
+  }
+
+  /* Respect prefers-reduced-motion — never remove this */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

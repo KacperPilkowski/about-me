@@ -1,0 +1,16 @@
+{
+  "nav.say_hi": "Say Hi!",
+  "section.about": "About",
+  "section.skills": "Skills",
+  "section.experience": "Experience",
+  "section.education": "Education",
+  "section.languages": "Languages",
+  "section.projects": "Projects",
+  "section.blog": "Blog",
+  "skills.search": "Search by skill...",
+  "skills.show_more": "Show more",
+  "skills.show_less": "Show less",
+  "blog.read": "Read article",
+  "blog.no_results": "No articles found for '{{query}}'",
+  "scroll.down": "scroll down"
+}

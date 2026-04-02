@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from './layout/sidebar/sidebar';
+import { LanguageService } from './core/language.service';
 
 @Component({
   selector: 'app-root',
@@ -8,4 +9,8 @@ import { Sidebar } from './layout/sidebar/sidebar';
   imports: [RouterOutlet, Sidebar],
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  constructor() {
+    inject(LanguageService).init();
+  }
+}

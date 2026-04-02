@@ -13,4 +13,4 @@ apps/frontend/dist/
 *.tfstate.backup
 *.tfplan
 
-apps/frontend/.playwright-cli/*
+**/.playwright-cli/*

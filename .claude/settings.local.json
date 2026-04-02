@@ -21,7 +21,10 @@
       "Bash(playwright-cli snapshot:*)",
       "Bash(playwright-cli close:*)",
       "Bash(npx vitest:*)",
-      "Bash(npx ng:*)"
+      "Bash(npx ng:*)",
+      "Bash(playwright-cli press:*)",
+      "Bash(playwright-cli resize:*)",
+      "Bash(gh pr create:*)"
     ]
   }
 }

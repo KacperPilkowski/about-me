@@ -1,5 +1,32 @@
 <app-sidebar />
 
+<div class="md:hidden min-h-screen flex flex-col items-center justify-center bg-base px-8 relative">
+  <div class="absolute top-4 left-4">
+    <app-language-switcher />
+  </div>
+
+  <div class="w-36 h-36 rounded-full bg-surface border border-border mb-6 shrink-0"></div>
+
+  <h1 class="font-mono text-2xl text-primary tracking-wide text-center mt-6 mb-2">Your Name</h1>
+
+  <p class="font-body text-sm text-muted text-center mb-8">Your Role / Title</p>
+
+  <div class="flex items-center gap-4 mt-6">
+    <div class="w-8 h-8 rounded-md bg-surface border border-border"></div>
+    <div class="w-8 h-8 rounded-md bg-surface border border-border"></div>
+    <div class="w-8 h-8 rounded-md bg-surface border border-border"></div>
+  </div>
+
+  <button class="mt-4 bg-accent text-inverse rounded-full px-8 py-3 font-mono text-sm">Say Hi!</button>
+
+  <div class="absolute bottom-8 flex flex-col items-center animate-bounce">
+    <span class="text-xs text-muted font-mono mb-2">scroll down</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </div>
+</div>
+
 <main class="ml-[360px] lg:ml-[360px] md:ml-[280px] max-md:ml-0
              min-h-screen px-16 pt-12 max-md:px-6 max-md:pt-8">
   <div class="max-w-[960px]">

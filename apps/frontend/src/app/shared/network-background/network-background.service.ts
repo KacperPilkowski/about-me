@@ -17,6 +17,8 @@ export class NetworkBackgroundService {
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
   private visibilityHandler: (() => void) | null = null;
   private resizeHandler: (() => void) | null = null;
+  private reducedMotionMql: MediaQueryList | null = null;
+  private reducedMotionHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
   init(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
@@ -27,12 +29,22 @@ export class NetworkBackgroundService {
 
     this.particles = this.createParticles();
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.reducedMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    if (reducedMotion) {
+    if (this.reducedMotionMql.matches) {
       this.drawFrame();
       return;
     }
+
+    this.reducedMotionHandler = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        this.cancelRaf();
+        this.drawFrame();
+      } else {
+        this.startLoop();
+      }
+    };
+    this.reducedMotionMql.addEventListener('change', this.reducedMotionHandler);
 
     this.visibilityHandler = () => {
       if (document.hidden) {
@@ -65,6 +77,12 @@ export class NetworkBackgroundService {
     if (this.resizeTimer !== null) {
       clearTimeout(this.resizeTimer);
       this.resizeTimer = null;
+    }
+
+    if (this.reducedMotionMql && this.reducedMotionHandler) {
+      this.reducedMotionMql.removeEventListener('change', this.reducedMotionHandler);
+      this.reducedMotionMql = null;
+      this.reducedMotionHandler = null;
     }
 
     if (this.visibilityHandler) {

@@ -24,20 +24,30 @@ function makeCanvas(width = 1280, height = 800): HTMLCanvasElement {
   return canvas;
 }
 
-function setupMatchMedia(reducedMotion: boolean): void {
+function setupMatchMedia(reducedMotion: boolean): MediaQueryList {
+  const mql = {
+    matches: reducedMotion,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  } as unknown as MediaQueryList;
+
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: vi.fn().mockReturnValue({ matches: reducedMotion }),
+    value: vi.fn().mockReturnValue(mql),
   });
+
+  return mql;
 }
 
 describe('NetworkBackgroundService', () => {
   let service: NetworkBackgroundService;
 
+  let mql: MediaQueryList;
+
   beforeEach(() => {
     vi.stubGlobal('requestAnimationFrame', vi.fn().mockReturnValue(1));
     vi.stubGlobal('cancelAnimationFrame', vi.fn());
-    setupMatchMedia(false);
+    mql = setupMatchMedia(false);
 
     TestBed.configureTestingModule({ providers: [NetworkBackgroundService] });
     service = TestBed.inject(NetworkBackgroundService);
@@ -83,7 +93,7 @@ describe('NetworkBackgroundService', () => {
     });
 
     it('starts the RAF loop when reduced motion is off', () => {
-      setupMatchMedia(false);
+      mql = setupMatchMedia(false);
       const canvas = makeCanvas();
 
       service.init(canvas);
@@ -92,12 +102,44 @@ describe('NetworkBackgroundService', () => {
     });
 
     it('does not start the RAF loop when prefers-reduced-motion is set', () => {
-      setupMatchMedia(true);
+      mql = setupMatchMedia(true);
       const canvas = makeCanvas();
 
       service.init(canvas);
 
       expect(requestAnimationFrame).not.toHaveBeenCalled();
+    });
+
+    it('registers a change listener on the reduced-motion media query', () => {
+      mql = setupMatchMedia(false);
+      const canvas = makeCanvas();
+
+      service.init(canvas);
+
+      expect(mql.addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+    });
+
+    it('stops the RAF loop when reduced-motion is enabled after init', () => {
+      mql = setupMatchMedia(false);
+      const canvas = makeCanvas();
+      service.init(canvas);
+
+      const [[, handler]] = (mql.addEventListener as ReturnType<typeof vi.fn>).mock.calls;
+      handler({ matches: true } as MediaQueryListEvent);
+
+      expect(cancelAnimationFrame).toHaveBeenCalledWith(1);
+    });
+
+    it('resumes the RAF loop when reduced-motion is disabled after init', () => {
+      mql = setupMatchMedia(false);
+      const canvas = makeCanvas();
+      service.init(canvas);
+      vi.mocked(requestAnimationFrame).mockClear();
+
+      const [[, handler]] = (mql.addEventListener as ReturnType<typeof vi.fn>).mock.calls;
+      handler({ matches: false } as MediaQueryListEvent);
+
+      expect(requestAnimationFrame).toHaveBeenCalled();
     });
 
     it('registers visibilitychange and resize listeners', () => {
@@ -164,7 +206,7 @@ describe('NetworkBackgroundService', () => {
       expect(cancelAnimationFrame).toHaveBeenCalledWith(1);
     });
 
-    it('removes visibilitychange and resize listeners', () => {
+    it('removes visibilitychange, resize, and reduced-motion listeners', () => {
       const docSpy = vi.spyOn(document, 'removeEventListener');
       const winSpy = vi.spyOn(window, 'removeEventListener');
       const canvas = makeCanvas();
@@ -174,6 +216,7 @@ describe('NetworkBackgroundService', () => {
 
       expect(docSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
       expect(winSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+      expect(mql.removeEventListener).toHaveBeenCalledWith('change', expect.any(Function));
     });
 
     it('clears particles after destroy', () => {

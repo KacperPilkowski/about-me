@@ -7,7 +7,7 @@ tags:
   - design-system
   - layout
   - desktop
-date: 2026-03-31
+date: 2026-04-03
 source: "[[design-system#3. Layout Architecture]]"
 ---
 
@@ -75,13 +75,17 @@ Fixed sidebar + scrollable main content split. The sidebar is an identity anchor
 ## Sidebar Contents (top → bottom)
 
 1. **Language switcher** — [[About me - UI desine/04-components/language-switcher/spec|app-language-switcher]], flag icons (EN / PL)
-2. **Avatar** — circular `w-36 h-36 rounded-full`, subtle ring `ring-2 ring-border`
-3. **Name** — `text-2xl font-bold text-primary font-mono`
-4. **Role / Title** — `text-sm text-accent tracking-wide`
-5. **"Get In Touch" label** — `text-xs text-muted uppercase tracking-widest`
-6. **Social icons** — LinkedIn, GitHub. Icon size `w-6 h-6`, `text-muted hover:text-accent duration-fast`
-7. **"Or" divider** — `text-xs text-muted`
-8. **CTA Button** — [[About me - UI desine/04-components/cta-button/spec|"Say Hi!"]] pink pill, `mailto:` link
+2. **Avatar** — circular `w-52 h-52 rounded-full`, subtle ring `ring-2 ring-border`
+3. **Name** — `text-2xl font-bold text-primary font-mono mt-6 mb-2 text-center`
+4. **Role / Title** — `text-lg text-accent tracking-wide text-center mb-8`
+5. **Contact zone** — pushed to sidebar bottom with `mt-auto`; all items inside wrapped in `flex flex-col items-center gap-3` for uniform 12px spacing:
+   - **"Get In Touch" label** — `text-xs text-muted uppercase tracking-widest`
+   - **Social icons row** — LinkedIn + GitHub SVGs, `w-6 h-6 text-muted hover:text-accent transition-colors duration-fast`; each `<a>` has `aria-label`, `target="_blank" rel="noopener noreferrer"`, and `focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base`
+   - **"Or" divider** — `text-xs text-muted`
+   - **CTA Button** — [[About me - UI desine/04-components/cta-button/spec|app-cta-button]] pink pill, `mailto:` link
+
+> [!note] Layout: `mt-auto` vs `flex-1` spacer
+> The contact zone uses `mt-auto` on its wrapper div. This pushes it to the bottom of the flex column while keeping a proportional gap, without creating an oversized empty block.
 
 ## Breakpoints (Tailwind defaults)
 

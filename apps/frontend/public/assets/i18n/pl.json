@@ -12,5 +12,8 @@
   "skills.show_less": "Pokaż mniej",
   "blog.read": "Czytaj artykuł",
   "blog.no_results": "Brak artykułów dla '{{query}}'",
-  "scroll.down": "przewiń w dół"
+  "scroll.down": "przewiń w dół",
+  "sidebar.role": "Solution Architect",
+  "sidebar.get_in_touch": "Skontaktuj się",
+  "sidebar.or": "lub"
 }

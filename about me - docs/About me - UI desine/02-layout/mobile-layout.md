@@ -8,7 +8,7 @@ tags:
   - layout
   - mobile
   - responsive
-date: 2026-03-31
+date: 2026-04-03
 source: "[[design-system#9. Responsive Behavior]]"
 ---
 
@@ -30,7 +30,9 @@ The sidebar **is not fixed** on mobile. It becomes a full-screen intro panel tha
 │  [Avatar]                      │
 │  [Name]                        │
 │  [Role]                        │
+│  [Get In Touch label]          │
 │  [Social links]                │
+│  [or divider]                  │
 │  [CTA button]                  │
 │                                │
 │  [↓ bouncing chevron]          │
@@ -52,23 +54,43 @@ The sidebar **is not fixed** on mobile. It becomes a full-screen intro panel tha
 <section class="md:hidden min-h-screen flex flex-col items-center justify-center
                 bg-base px-8 relative">
 
-  <!-- Language switcher -->
-  <div class="absolute top-4 left-4 flex gap-2">...</div>
+  <!-- Language switcher — absolute top-left -->
+  <div class="absolute top-4 left-4"><app-language-switcher /></div>
 
-  <!-- Profile content (same as sidebar) -->
-  <img src="..." class="w-36 h-36 rounded-full ring-2 ring-border" />
-  <h1 class="mt-6 text-2xl font-bold font-mono text-primary">Kacper Piłkowski</h1>
-  <p class="text-sm text-accent tracking-wide">Solution Architect</p>
+  <!-- Avatar -->
+  <img src="/assets/profile-photo-320x320.webp" alt="Kacper Piłkowski"
+       class="w-52 h-52 rounded-full ring-2 ring-border shrink-0"
+       width="208" height="208" />
 
-  <!-- Social + CTA -->
-  <div class="mt-6 flex gap-4">...</div>
-  <a href="mailto:..." class="mt-4 bg-accent text-inverse rounded-full px-8 py-3 ...">
-    Say Hi!
-  </a>
+  <!-- Name -->
+  <h1 class="mt-6 mb-2 text-2xl font-bold font-mono text-primary tracking-wide text-center">
+    Kacper Piłkowski
+  </h1>
+
+  <!-- Role -->
+  <p class="text-lg text-accent tracking-wide text-center mb-8">
+    {{ 'sidebar.role' | translate }}
+  </p>
+
+  <!-- Get In Touch label -->
+  <p class="text-xs text-muted uppercase tracking-widest mt-6 mb-3">
+    {{ 'sidebar.get_in_touch' | translate }}
+  </p>
+
+  <!-- Social icons -->
+  <div class="flex items-center gap-4 mb-3">
+    <!-- LinkedIn + GitHub SVGs: w-6 h-6 text-muted hover:text-accent, focus-visible ring -->
+  </div>
+
+  <!-- "Or" divider -->
+  <p class="text-xs text-muted mb-3">{{ 'sidebar.or' | translate }}</p>
+
+  <!-- CTA -->
+  <app-cta-button />
 
   <!-- Scroll indicator at bottom -->
   <div class="absolute bottom-8 flex flex-col items-center animate-bounce">
-    <span class="text-xs text-muted font-mono mb-2">scroll down</span>
+    <span class="text-xs text-muted font-mono mb-2">{{ 'scroll.down' | translate }}</span>
     <svg class="w-5 h-5 text-muted"><!-- Chevron down icon --></svg>
   </div>
 </section>

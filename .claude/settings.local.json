@@ -30,7 +30,8 @@
       "Read(//tmp/**)",
       "Bash(pkill -f \"ng serve\")",
       "Bash(npx lighthouse:*)",
-      "Bash(lighthouse:*)"
+      "Bash(lighthouse:*)",
+      "Bash(npx nx:*)"
     ]
   }
 }

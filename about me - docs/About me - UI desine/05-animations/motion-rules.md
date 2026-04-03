@@ -9,7 +9,7 @@ tags:
   - animation
   - accessibility
   - conventions
-date: 2026-03-31
+date: 2026-04-03
 source: "[[design-system#6. Animation & Motion Specifications]]"
 ---
 
@@ -54,6 +54,8 @@ Special cases to handle explicitly in components (not just via the global rule):
 | Skill bar fill (on load)| Width transition `duration-slow` | Confirm — skill loaded  |
 | Card hover              | `shadow-glow-accent` transition | Confirm — item is interactive |
 | Page background         | Canvas particle drift    | Sense of place — ambient       |
+| Heading typewriter sequence | Character-by-character typing | Orient — establishes which section is active |
+| h1 cycling phrases      | Backspace + retype every 3 s | Sense of place — keeps hero alive after sequence |
 
 ## When NOT to Animate
 

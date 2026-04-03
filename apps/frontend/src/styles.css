@@ -69,7 +69,27 @@
   /* Easing functions */
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Animations */
+  --animate-blink: blink 1s step-end infinite;
 }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@utility animate-blink {
+  animation: var(--animate-blink);
+}
+
+/* ───────────────────────────────────────────
+   Explicit class allowlist for dynamically-constructed strings.
+   These classes are built at runtime in computed() / template literals
+   and are invisible to Tailwind's content scanner.
+   Covers: SectionHeading.headingClass() computed property.
+─────────────────────────────────────────────*/
+@source inline("font-mono text-3xl text-xl text-lg text-base text-primary flex items-baseline gap-1");
 
 /* ───────────────────────────────────────────
    Global base styles

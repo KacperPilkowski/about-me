@@ -1,0 +1,42 @@
+<div class="mb-8">
+  @switch (level()) {
+    @case (1) {
+      <h1 [class]="headingClass()" [attr.aria-label]="title()">
+        <ng-container *ngTemplateOutlet="innerContent" />
+      </h1>
+    }
+    @case (2) {
+      <h2 [class]="headingClass()" [attr.aria-label]="title()">
+        <ng-container *ngTemplateOutlet="innerContent" />
+      </h2>
+    }
+    @case (3) {
+      <h3 [class]="headingClass()" [attr.aria-label]="title()">
+        <ng-container *ngTemplateOutlet="innerContent" />
+      </h3>
+    }
+    @case (4) {
+      <h4 [class]="headingClass()" [attr.aria-label]="title()">
+        <ng-container *ngTemplateOutlet="innerContent" />
+      </h4>
+    }
+  }
+  <div class="border-b border-border mt-2"></div>
+</div>
+
+<ng-template #innerContent>
+  @if (active()) {
+    <span aria-hidden="true" class="text-accent">&gt;</span>
+  } @else if (typingDone()) {
+    <span aria-hidden="true" class="text-muted">*</span>
+  } @else {
+    <span aria-hidden="true" class="invisible">&gt;</span>
+  }
+  <span aria-hidden="true" [class.opacity-0]="!isBrowser()">{{ displayedText() }}</span>
+  <span
+    aria-hidden="true"
+    class="text-accent"
+    [class.animate-blink]="active()"
+    [class.invisible]="!active()"
+  >_</span>
+</ng-template>

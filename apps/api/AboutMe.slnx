@@ -3,10 +3,10 @@
     <Project Path="src/AboutMe.Api.csproj" />
   </Folder>
   <Folder Name="/tests/" />
-  <Folder Name="/tests/Integration/">
-    <Project Path="tests/Integration/AboutMe.Integration.Tests.csproj" />
+  <Folder Name="/tests/integration/">
+    <Project Path="tests/integration/AboutMe.Integration.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/Unit/">
-    <Project Path="tests/Unit/AboutMe.Unit.Tests.csproj" />
+  <Folder Name="/tests/unit/">
+    <Project Path="tests/unit/AboutMe.Unit.Tests.csproj" />
   </Folder>
 </Solution>

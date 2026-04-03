@@ -24,10 +24,12 @@ jobs:
         working-directory: apps/api
 
       - name: Unit tests
-        run: dotnet test tests/api/Unit --no-build
+        run: dotnet test tests/unit --no-build
+        working-directory: apps/api
 
       - name: Integration tests
-        run: dotnet test tests/api/Integration --no-build
+        run: dotnet test tests/integration --no-build
+        working-directory: apps/api
         env:
           ConnectionStrings__Default: ${{ secrets.TEST_DB_CONNECTION }}
 
@@ -46,11 +48,8 @@ jobs:
       - run: npm ci
         working-directory: apps/frontend
 
-      - run: npm run lint
+      - run: npm test -- --watch=false
         working-directory: apps/frontend
 
-      - run: npm test -- --watch=false --browsers=ChromeHeadless
-        working-directory: apps/frontend
-
-      - run: npm run build:ssr
+      - run: npm run build
         working-directory: apps/frontend

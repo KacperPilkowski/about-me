@@ -1,13 +1,23 @@
-<section class="mb-16">
-  <h1 class="font-mono text-3xl text-primary mb-4 tracking-tight">{{ 'section.about' | translate }}</h1>
+<section class="mb-16" #headingSection>
+  <app-section-heading
+    [title]="'section.about' | translate"
+    [level]="1"
+    [active]="activeIndex() === 0 || allTyped()"
+    [startTyping]="activeIndex() === 0"
+    [cycleTextKeys]="allTyped() ? cycleTextKeys : []"
+    (typingComplete)="onHeadingTyped(0)" />
   <p class="font-body text-muted leading-relaxed max-w-prose">
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
     tempor incididunt ut labore et dolore magna aliqua.
   </p>
 </section>
 
-<section class="mb-16">
-  <h2 class="font-mono text-xl text-primary mb-4 tracking-tight">{{ 'section.experience' | translate }}</h2>
+<section class="mb-16" #headingSection>
+  <app-section-heading
+    [title]="'section.experience' | translate"
+    [active]="activeIndex() === 1"
+    [startTyping]="activeIndex() === 1"
+    (typingComplete)="onHeadingTyped(1)" />
   <div class="bg-surface border border-border rounded-md p-6 mb-4">
     <p class="font-mono text-sm text-muted mb-1">2023 — Present</p>
     <p class="font-body text-primary mb-2">Senior Developer — Placeholder Company</p>
@@ -17,8 +27,12 @@
   </div>
 </section>
 
-<section class="mb-16">
-  <h2 class="font-mono text-xl text-primary mb-4 tracking-tight">{{ 'section.skills' | translate }}</h2>
+<section class="mb-16" #headingSection>
+  <app-section-heading
+    [title]="'section.skills' | translate"
+    [active]="activeIndex() === 2"
+    [startTyping]="activeIndex() === 2"
+    (typingComplete)="onHeadingTyped(2)" />
   <p class="font-body text-muted leading-relaxed max-w-prose">
     Sunt in culpa qui officia deserunt mollit anim id est laborum.
   </p>

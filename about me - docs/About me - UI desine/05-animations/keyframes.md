@@ -11,7 +11,7 @@ tags:
   - design-system
   - animation
   - tokens
-date: 2026-03-31
+date: 2026-04-03
 source: "[[design-system#2.1 Tailwind Configuration]]"
 ---
 
@@ -124,14 +124,36 @@ Triggered by Intersection Observer with `threshold: 0.1`. Tailwind alternative f
 
 ---
 
-### Typewriter Effect (Hero heading)
+### Typewriter Effect (Orchestrated heading sequence)
 
-| Property        | Value                                    |
-|-----------------|------------------------------------------|
-| Character delay | `80ms` per character                     |
-| Cursor          | `_`, `text-accent`, blinks after typing  |
-| Start delay     | `300ms` after page load                  |
-| Replay on nav   | No — first visit or hard refresh only    |
+The typewriter is a coordinated sequence across all `[[About me - UI desine/04-components/section-heading/spec|app-section-heading]]` instances, driven by `app-home` via `IntersectionObserver`.
 
-> [!note] Blink behaviour
-> Only the first [[About me - UI desine/04-components/section-heading/spec|section heading]] on page load gets the blinking cursor. All others show a static `_`.
+**Sequence:**
+1. Page loads → `activeIndex = -1`, all headings inactive (no `>` or `_`)
+2. Section 0 enters viewport → `activeIndex = 0`, h1 starts typing
+3. h1 completes → `typingComplete` fires → `activeIndex = 1`, h2 (Experience) starts typing
+4. h2 completes → `activeIndex = 2`, h2 (Skills) starts typing
+5. h2 (Skills) completes → `activeIndex = 0`, `allTyped = true`, h1 stays active permanently
+6. h1 cycling begins: every 3000ms, backspace + retype a new phrase
+
+**Timing values:**
+
+| Phase | Value |
+|-------|-------|
+| Initial delay (before first char) | `300ms` |
+| Character typing speed | `80ms` per character |
+| Backspace speed (cycling erase) | `50ms` per character |
+| Cycle phrase typing speed | `80ms` per character |
+| Pause between cycles | `3000ms` |
+
+**Viewport gate:**
+Each heading only starts typing when its parent `<section>` is at least 10% visible (`IntersectionObserver threshold: 0.1`). If a heading is not yet visible when the previous one finishes, `advanceTo()` stores a `pendingIndex` and fires when the observer reports intersection.
+
+**Cursor behaviour:**
+Only the `active` heading shows the blinking `_`. All other headings have an invisible `_` placeholder in the DOM at all times to prevent layout shift.
+
+**SSR / prerender:**
+`activeIndex` is `signal(-1)` on the server. All `active` and `startTyping` bindings evaluate to `false`. No `>`, no `_`, no cycling — just clean heading text. Cycling starts inside `afterNextRender()` and never runs during prerendering.
+
+> [!note] Implementation
+> All timing is implemented with RxJS (`timer()`, `interval()`, `concat()`, `defer()`) — never `setTimeout` or `setInterval`. See [[decisions#RxJS for animations]].

@@ -31,7 +31,8 @@
       "Bash(pkill -f \"ng serve\")",
       "Bash(npx lighthouse:*)",
       "Bash(lighthouse:*)",
-      "Bash(npx nx:*)"
+      "Bash(npx nx:*)",
+      "Bash(playwright-cli mousewheel:*)"
     ]
   }
 }
